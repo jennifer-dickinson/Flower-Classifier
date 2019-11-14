@@ -1,6 +1,6 @@
 import helper
 
-args = helper.get_input_args()
+args = helper.get_train_args()
 print(args)
 
 import numpy as np
@@ -45,7 +45,11 @@ testloader = torch.utils.data.DataLoader(test_data, batch_size=32)
 validloader = torch.utils.data.DataLoader(valid_data, batch_size=32)
 ###
 
+model.class_to_idx =  train_data.class_to_idx
+Model.save(model, 'test_checkpoint.pth')
+
 device = torch.device("cuda" if torch.cuda.is_available() and args.gpu else "cpu")
+
 
 criterion = nn.NLLLoss()
 optimizer = optim.Adam(model.classifier.parameters(), lr= args.learning_rate)

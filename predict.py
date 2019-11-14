@@ -1,5 +1,5 @@
 import helper
-import Image
+from PIL import Image
 import model as Model
 import torch
 
@@ -26,6 +26,10 @@ def process_image(image):
 
 class_idx = dict((key, cl) for (cl, key) in model.class_to_idx.items())
 
+import json
+if args.category_names:
+    with open(args.category_names, 'r') as f:
+        cat_to_name = json.load(f)
 
 # ## Predict Function
 
@@ -45,15 +49,14 @@ def predict(image_path, model, topk=5):
     probs, cl = probs.to('cpu'), cl.to('cpu')
     probs = probs.reshape(-1).numpy()
     cl = cl.reshape(-1).numpy()
-    cl = [cat_to_name[class_idx[c]] for c in cl]
+    
+    if args.category_names:
+        cl = [cat_to_name[class_idx[c]] for c in cl]
+        
     return probs, cl
-
-
-import json
-if args.category_names:
-    with open(args.category_names, 'r') as f:
-        cat_to_name = json.load(f)
 
 probs, cls = predict(args.image_path, model)
 
-print(probs, cls)
+print("Prediction results:")
+for (p, c) in zip(probs, cls):
+    print('{:7.1%}'.format(p), ' '.join([word.capitalize() for word in c.split()]))

@@ -42,6 +42,7 @@ def model_factory(arch = "densenet121", hidden_units = 512, gpu = False, **kwarg
     model.classifier  = nn.Sequential(OrderedDict([
                             ('fc1', nn.Linear(1024, hidden_units)), #custom hidden units
                             ('drop1', nn.Dropout(p=0.1)),
+                            ('fc2', nn.Linear(hidden_units, 102)),
                             ('output', nn.LogSoftmax(dim=1))
                             ]))
 
@@ -62,13 +63,15 @@ def load(path = "checkpoint.pth"):
     checkpoint = TorchLoad(path)
     model = model_factory(**checkpoint)
     model.load_state_dict(checkpoint["state_dict"])
+    model.class_to_idx = checkpoint["class_to_idx"]
     return model
 
 
 def save(model, path = "checkpoint.pth"):
     checkpoint = {
         "state_dict" : model.state_dict(),
-        **model.settings
+        **model.settings,
+        "class_to_idx" : model.class_to_idx,
     }
     TorchSave(checkpoint, path)
 

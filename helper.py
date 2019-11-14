@@ -1,5 +1,6 @@
 import argparse
 from torch import exp, FloatTensor
+from torchvision import transforms
 
 def get_train_args():
     parser = argparse.ArgumentParser(description = "Train a neural network")
