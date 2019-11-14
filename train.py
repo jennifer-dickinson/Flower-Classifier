@@ -1,3 +1,8 @@
+import helper
+
+args = helper.get_input_args()
+print(args)
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -7,14 +12,11 @@ import torch
 from torch import nn
 from torch import optim
 import torch.nn.functional as F
-from torchvision import datasets, transforms, models
+from torchvision import datasets, transforms
 
 from PIL import Image
 
 import model as Model
-import helper
-
-args = helper.get_input_args()
 
 model = Model.model_factory(
     arch = args.arch,
@@ -22,10 +24,6 @@ model = Model.model_factory(
     gpu = args.gpu
     )
 
-print(args)
-# print(args.save_dir + "/checkpoint.pth")
-
-###
 data_dir = args.data_directory
 train_dir = data_dir + '/train'
 valid_dir = data_dir + '/valid'

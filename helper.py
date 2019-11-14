@@ -1,5 +1,5 @@
 import argparse
-import torch
+from torch import exp, FloatTensor
 
 def get_input_args():
     parser = argparse.ArgumentParser(description = "Train a neural network")
@@ -24,10 +24,10 @@ def validation(model, testloader, criterion, device):
         output = model.forward(images)
         test_loss += criterion(output, labels).item()
 
-        ps = torch.exp(output)
+        ps = exp(output)
             
         equality = (labels.data == ps.max(dim=1)[1])
-        accuracy += equality.type(torch.FloatTensor).mean()
+        accuracy += equality.type(FloatTensor).mean()
         first = False
     if training: model.train()
     return test_loss, accuracy
