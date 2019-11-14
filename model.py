@@ -4,14 +4,26 @@ from torch import nn
 from torch import save as TorchSave
 from torch import load as TorchLoad
 
+# models = {
+#         "resnet18" : models.resnet18,
+#         "alexnet" : models.alexnet,
+#         "vgg13" : models.vgg13,
+#         "squeezenet" : models.squeezenet1_0,
+#         "densenet" : models.densenet161,
+#         "inception" : models.inception_v3,
+#         "densenet121" : models.densenet121
+# }
+
 models = {
-        "resnet18" : models.resnet18,
-        "alexnet" : models.alexnet,
-        "vgg13" : models.vgg13,
-        "squeezenet" : models.squeezenet1_0,
-        "densenet" : models.densenet161,
-        "inception" : models.inception_v3,
-        "densenet121" : models.densenet121
+    "densenet161" : models.densenet161,
+    "vgg16_bn" : models.vgg16_bn,
+    "resnet18" : models.resnet18,
+    "resnet34" : models.resnet34,
+    "resnet50" : models.resnet50,
+    "densenet201" : models.densenet201,
+    "vgg13_bn" : models.vgg13_bn,
+    "densenet121" : models.densenet121,
+    "vgg19_bn" : models.vgg19_bn
 }
 
 def model_factory(arch = "densenet121", hidden_units = 512, gpu = False, **kwargs):
