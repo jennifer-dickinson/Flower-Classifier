@@ -32,25 +32,12 @@ test_dir = data_dir + '/test'
 train_transforms = transforms.Compose([transforms.RandomRotation(30),
                                        transforms.RandomResizedCrop(100),
                                        transforms.RandomHorizontalFlip(),
-                                       transforms.Resize(255),
-                                       transforms.CenterCrop(224),
-                                       transforms.ToTensor(),
-                                       transforms.Normalize(
-                                          [0.485, 0.456, 0.406],
-                                          [0.229, 0.224, 0.225]
-                                      )])
+                                       helper.standard_transforms])
 
-test_transforms = transforms.Compose([transforms.Resize(255),
-                                      transforms.CenterCrop(224),
-                                      transforms.ToTensor(),
-                                      transforms.Normalize(
-                                          [0.485, 0.456, 0.406],
-                                          [0.229, 0.224, 0.225]
-                                      )])
 
 train_data = datasets.ImageFolder(train_dir, transform=train_transforms)
-test_data = datasets.ImageFolder(test_dir, transform=test_transforms)
-valid_data = datasets.ImageFolder(valid_dir, transform=test_transforms)
+test_data = datasets.ImageFolder(test_dir, transform=helper.standard_transforms)
+valid_data = datasets.ImageFolder(valid_dir, transform=helper.standard_transforms)
 
 
 trainloader = torch.utils.data.DataLoader(train_data, batch_size=64, shuffle=True)
