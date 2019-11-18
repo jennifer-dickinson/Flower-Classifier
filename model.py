@@ -4,6 +4,9 @@ from torch import nn
 from torch import save as TorchSave
 from torch import load as TorchLoad
 
+from torch import optim
+
+
 # models = {
 #         "resnet18" : models.resnet18,
 #         "alexnet" : models.alexnet,
@@ -14,7 +17,7 @@ from torch import load as TorchLoad
 #         "densenet121" : models.densenet121
 # }
 
-models = {
+supported_models = {
     "densenet161" : models.densenet161,
     "vgg16_bn" : models.vgg16_bn,
     "resnet18" : models.resnet18,
@@ -26,12 +29,12 @@ models = {
     "vgg19_bn" : models.vgg19_bn
 }
 
-def model_factory(arch = "densenet121", hidden_units = 512, gpu = False, **kwargs):
+def model_factory(arch = "densenet121", hidden_units = 512, gpu = False, learningrate = 0.001, current_epochs = 0, **kwargs):
 
-    if arch in models.keys():
-        model = models[arch](pretrained = True)
+    if arch in supported_models.keys():
+        model = supported_models[arch](pretrained = True)
     else:
-        print(f"Model {arch} is unknown")
+        print(f"Model {arch} is unsupported")
         return None
 
     # make sure to freeze the pretrained parameters
@@ -39,12 +42,14 @@ def model_factory(arch = "densenet121", hidden_units = 512, gpu = False, **kwarg
         param.requires_grad = False
 
     # add our our layer
-    model.classifier  = nn.Sequential(OrderedDict([
-                            ('fc1', nn.Linear(1024, hidden_units)), #custom hidden units
-                            ('drop1', nn.Dropout(p=0.1)),
-                            ('fc2', nn.Linear(hidden_units, 102)),
-                            ('output', nn.LogSoftmax(dim=1))
-                            ]))
+    model.classifier = nn.Sequential(OrderedDict([
+                          ('fc1', nn.Linear(1024, hidden_units)),
+                          ('drop1', nn.Dropout(p=0.1)),
+                          ('relu', nn.ReLU()),
+                          ('drop2', nn.Dropout(p=0.1)),
+                          ('fc2', nn.Linear(hidden_units, 102)),
+                          ('output', nn.LogSoftmax(dim=1))
+                          ]))
 
     if gpu:
         model.to('cuda')
@@ -52,27 +57,38 @@ def model_factory(arch = "densenet121", hidden_units = 512, gpu = False, **kwarg
         model.to('cpu')    
 
     model.settings = {
-        "model" : arch,
+        "arch" : arch,
         "hidden_units" : hidden_units,
         "gpu" : gpu,
         "class_to_idx" : None,
+        "current_epoch" : current_epochs,
+        "learningrate" : learningrate
     }   
     return model
 
 def load(path = "checkpoint.pth"):
     checkpoint = TorchLoad(path)
     model = model_factory(**checkpoint)
-    model.load_state_dict(checkpoint["state_dict"])
     model.class_to_idx = checkpoint["class_to_idx"]
-    return model
+    model.load_state_dict(checkpoint["model"])
+    optimizer = optim.Adam(model.classifier.parameters())
+    optimizer.load_state_dict(checkpoint["optimizer"])
+
+    return model, optimizer
 
 
-def save(model, path = "checkpoint.pth"):
+def save(model, optimizer, path = "checkpoint.pth"):
     checkpoint = {
-        "state_dict" : model.state_dict(),
         **model.settings,
+        "model" : model.state_dict(),
         "class_to_idx" : model.class_to_idx,
+        "optimizer" : optimizer.state_dict()
     }
+    for key in checkpoint.keys():
+        if key != "model" and key != "optimizer":
+            print(key, ":", checkpoint[key])
+        else:
+            print(key, ":", type(checkpoint[key]))
     TorchSave(checkpoint, path)
 
 # model = model_factory()

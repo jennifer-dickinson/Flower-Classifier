@@ -21,7 +21,8 @@ import model as Model
 model = Model.model_factory(
     arch = args.arch,
     hidden_units = args.hidden_units,
-    gpu = args.gpu
+    gpu = args.gpu,
+    learningrate = args.learning_rate
     )
 
 data_dir = args.data_directory
@@ -43,22 +44,22 @@ valid_data = datasets.ImageFolder(valid_dir, transform=helper.standard_transform
 trainloader = torch.utils.data.DataLoader(train_data, batch_size=64, shuffle=True)
 testloader = torch.utils.data.DataLoader(test_data, batch_size=32)
 validloader = torch.utils.data.DataLoader(valid_data, batch_size=32)
-###
+
 
 model.class_to_idx =  train_data.class_to_idx
-Model.save(model, 'test_checkpoint.pth')
 
 device = torch.device("cuda" if torch.cuda.is_available() and args.gpu else "cpu")
 
-
 criterion = nn.NLLLoss()
-optimizer = optim.Adam(model.classifier.parameters(), lr= args.learning_rate)
+optimizer = optim.Adam(model.classifier.parameters(), lr = model.settings["learningrate"])
 model.to(device)
 
+epochs = args.epochs
+print_every = 20
 steps = 0
-print_every = 5
+current_epoch = model.settings["current_epoch"]
 
-for e in range(args.epochs):
+for e in range(current_epoch, epochs):
     running_loss = 0
     for images, labels in iter(trainloader):
         steps += 1
@@ -73,22 +74,30 @@ for e in range(args.epochs):
 
         running_loss += loss.item()
         
+        print(f'Training epoch {e + 1}/{epochs}{"." * (steps % 4)}                    ', end = "\r")
+              
         if steps % print_every == 0:
+              
+            print('Running validation...                           ', end = '\r')
+
             # Make sure network is in eval mode for inference
             model.eval()
-            
+
             # Turn off gradients for validation, saves memory and computations
             with torch.no_grad():
                 test_loss, accuracy = helper.validation(model, testloader, criterion, device)
-                
-            print("Epoch: {}/{}.. ".format(e+1, args.epochs),
+
+            print("Epoch: {}/{}.. ".format(e+1, epochs),
                   "Training Loss: {:.3f}.. ".format(running_loss/print_every),
                   "Test Loss: {:.3f}.. ".format(test_loss/len(testloader)),
-                  "Test Accuracy: {:.3f}".format(accuracy/len(testloader)))
-            
+                  "Test Accuracy: {:.3f}".format(accuracy/len(testloader)),
+                  "\n",
+                  end = "\r")            
             running_loss = 0
-            
+
             # Make sure training is back on
             model.train()
+              
+    model.settings["current_epoch"] = e
 
-Model.save(model, args.save_dir + "/checkpoint.pth")
+Model.save(model, optimizer, args.save_dir + "/checkpoint.pth")

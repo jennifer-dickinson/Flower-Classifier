@@ -3,6 +3,7 @@ from PIL import Image
 import model as Model
 import torch
 
+
 # ## Get arguments
 args = helper.get_predict_args()
 print(args)
@@ -10,7 +11,7 @@ print(args)
 device = torch.device("cuda" if torch.cuda.is_available() and args.gpu else "cpu")
 
 # ## Load model
-model = Model.load(args.checkpoint)
+model, optimizer = Model.load(args.checkpoint)
 
 # ## Process Image
 def process_image(image):
@@ -52,11 +53,17 @@ def predict(image_path, model, topk=5):
     
     if args.category_names:
         cl = [cat_to_name[class_idx[c]] for c in cl]
+    else:
+        cl = [str(class_idx[c]) for c in cl]
         
     return probs, cl
 
 probs, cls = predict(args.image_path, model)
 
+
+
 print("Prediction results:")
 for (p, c) in zip(probs, cls):
     print('{:7.1%}'.format(p), ' '.join([word.capitalize() for word in c.split()]))
+    
+ 
