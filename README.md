@@ -11,7 +11,7 @@ November 2019
 
 ### Part 1
 
-- Image Classifer Project.html
+- Image_Classifer_Project.html
 
 ### Part 2
 
