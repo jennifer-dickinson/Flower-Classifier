@@ -7,6 +7,19 @@ Project code for Udacity's AI Programming with Python Nanodegree program. In thi
 Jennifer Salas <br>
 November 2019
 
+## Submission Files
+
+### Part 1
+
+- Image Classifer Project.html
+
+### Part 2
+
+- train.py
+- predict.py
+- helper.py
+- model.py
+
 ## Train.py
 
 Train a neural network
